@@ -1,6 +1,7 @@
 <?php
 
     require_once '../models/Post.php';
+    include '../server/config.php';
 
     // Start PHP session
     if (session_status() === PHP_SESSION_NONE) {
@@ -11,9 +12,6 @@
         header("Location: ../index.php");
         exit();
     }
-
-    $posts = $_SESSION['posts'];
-    // Query all posts from table
 ?>
 
 <!DOCTYPE html>
@@ -35,6 +33,17 @@
     </head>
     <body>
         <!-- Main Content-->
+        <?php 
+        
+            $select = "SELECT * FROM posted";
+            $result = $conn->query($select);
+
+            if (!$result){
+                die("date Error");
+            }
+        
+        ?>
+
         <main class="mb-4 mt-5">
             <div class="container px-4 px-lg-5">
                 <div class="row gx-4 gx-lg-5 justify-content-center">
@@ -48,34 +57,31 @@
                                         <th scope="col">Title</th>
                                         <th scope="col">Content</th>
                                         <th scope="col">Image</th>
+                                        <th scope="col">Action</th>
                                         <th scope="col">
                                             <a class="btn btn-primary" href="../newPost.php">New Post</a>
                                         </th>
+        
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php 
-                                        if (count($posts)) { 
-                                            foreach($posts as $post) {
-                                                echo '
-                                                    <tr>
-                                                        <td>' . $post->id . '</td>
-                                                        <td>' . $post->title . '</td>
-                                                        <td>' . $post->content . '</td>
-                                                        <td><img src="' . $post->image . '" width=400 hight=400 /></td>
-                                                    </tr>
-                                                ';
-                                            }
-                                    
+                                    <?php
+                                        while($row = $result->fetch_assoc()){
                                     ?>
 
-                                    <?php } else { ?>
                                         <tr>
-                                            <td colspan="5">
-                                                <p>No record</p>
+                                            <td><?php echo $row['id']; ?></td>
+                                            <td><?php echo $row['title']; ?></td>
+                                            <td><?php echo $row['content']; ?></td>
+                                            <td><img src="../models/Upload/<?php echo $row['image']; ?>" height="100", width="100" alt=""></td>
+                                            <td>
+                                                <a href="../admin/update.php?edit=<?php echo $row['id'];?>" class="btn btn-primary">Update</a>
+                                                <a href="../admin/posts.php?delete=<?php echo $row['id'];?>" class="btn btn-danger">Delete</a>
                                             </td>
                                         </tr>
-                                    <?php } ?>
+                
+                                    <?php }; ?>
+                                    
                                 </tbody>
                             </table>
                         </div>

@@ -37,7 +37,7 @@
                                 <label for="content">Content</label>
                             </div>
                             <div class="form-floating">
-                                <input class="form-control" name="image" type="file" require></input>
+                                <input class="form-control" name="image" type="file" require accept="image/png, image/jpeg, image/jpg"></input>
                                 <label for="image">Image</label>
                             </div>
                             <br />

@@ -1,54 +1,33 @@
 <?php
 
-class Post
-{
+include '../server/config.php';
 
-    public function __construct(
-        public int $id,
-        public String $title,
-        public String $content,
-        public String $image
-    ) {
-    }
-}
+if(isset($_POST['btnSubmit'])){
+    $title = mysqli_real_escape_string($conn, $_POST['title']);
+    $content = mysqli_real_escape_string($conn, $_POST['content']);
+    $image = $_FILES['image']['name'];
+    $folderImage = "../models/Upload/".basename($image);
 
-session_start();
+    $sql = "INSERT INTO posted (title, content, image) VALUES ('$title', '$content', '$image')";
 
-if (!isset($_SESSION['posts'])) {
-    $_SESSION['posts'] = [];
-}
-
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $id = count($_SESSION['posts'], COUNT_NORMAL) + 1;
-    $title = $_POST['title'];
-    $content = $_POST['content'];
-    $image = $_POST['image'];
-
-
-    $folder = null;
-    $alwExtension = array('png', 'jpg');
-    if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
-        $name = $_FILES['image']['name'];
-        $tmpName = $_FILES['image']['tmp_name'];
-        $ext = pathinfo($name, PATHINFO_EXTENSION);
-        if (!in_array($ext, $alwExtension)) {
-            echo 'error';
+    if ($conn->query($sql) === TRUE) {
+        echo "New record created successfully";
+        if (move_uploaded_file($_FILES['image']['tmp_name'], $folderImage)){
+            echo "Image uploaded successfully";
+        } else {
+            echo "Failed to upload image";
         }
-        $folder = "../image/$name"; // img folder directory
-        move_uploaded_file($tmpName, $folder);
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
     }
 
+};
 
-    $newPost = new Post($id, $title, $content, $folder);
-
-
-
-    $_SESSION['posts'][] = $newPost;
-
-
-    header("Location: {$_SERVER['REQUEST_URI']}");
-    exit();
-}
+if(isset($_GET['delete'])){
+    $id = $_GET['delete'];
+    $remove = "DELETE FROM posted WHERE id = $id";
+    $conn->query($remove);
+    header('localhost:admin/posts.php');
+};
 
 ?>
